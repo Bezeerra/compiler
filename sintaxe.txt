@@ -5,19 +5,16 @@ Decls -> Decl Decls | Stmt Decls | ε
 Decl -> let id colon Type Decl'
 Type -> i32 | f32 | &str
 Decl' -> semicolon | = ExprL semicolon
-Stmt -> IfStmt | ForStmt | WhileStmt | Decl
+Stmt -> IfStmt | WhileStmt
 IfStmt -> if lparen ExprL rparen lbrace Decls rbrace ElsePart endIf
 ElsePart -> else lbrace Decls rbrace | ε
 WhileStmt -> while lparen ExprL rparen lbrace Decls rbrace endWhile
-ExprL -> ! ExprL | ExprR |ExprL' | id
-ExprL' -> ExprL && ExprL | ExprL '||' ExprL
-ExprR -> ExprM OP ExprM
-ExprM -> Term Expr'
-Expr' -> OP Term Expr' | OP Term Expr' | ε
-Term -> Factor Term'
-Term' -> OP Factor Term' | OP Factor Term' | ε
-Factor -> id | lparen Expr rparen
-
+ExprL -> ! ExprL ExprL' | ExprR ExprL'
+ExprL' -> && ExprL | || ExprL | ε
+ExprR -> ExprM ExprR'
+ExprR' -> OP ExprM | ε
+ExprM -> Factor ExprR'
+Factor -> id | lparen ExprL rparen
 OP -> plus | minus | == | != | > | >= | < | <= | times | divide
 
 
