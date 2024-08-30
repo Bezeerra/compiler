@@ -61,8 +61,8 @@ def lexical_analyser(filepath) -> list:
     return token_sequence
 
 def main():
-    tokens = lexical_analyser(os.path.join(Path(__file__).parent, 'example.be'))
-    ts = token_sequence(tokens)
+    # tokens = lexical_analyser(os.path.join(Path(__file__).parent, 'example.be'))
+    # ts = token_sequence(tokens)
     G = create_grammar()
     p_alg = predict_algorithm(G)
     print(is_ll1(G, p_alg))

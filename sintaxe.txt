@@ -9,12 +9,14 @@ Stmt -> IfStmt | WhileStmt
 IfStmt -> if lparen ExprL rparen lbrace Decls rbrace ElsePart endIf
 ElsePart -> else lbrace Decls rbrace | ε
 WhileStmt -> while lparen ExprL rparen lbrace Decls rbrace endWhile
-ExprL -> ! ExprL ExprL' | ExprR ExprL'
-ExprL' -> && ExprL | || ExprL | ε
-ExprR -> ExprM ExprR'
-ExprR' -> OP ExprM | ε
-ExprM -> Factor ExprR'
+ExprL -> NOT ExprL | simpleExprL exprLTail
+exprLTail -> OR ExprL | AND ExprL | ε
+simpleExprL -> ExprR simpleExprLTail
+simpleExprLTail -> relationalOperator ExprR | ε
+ExprR -> ExprRTerm ExprR'
+ExprR' -> plus ExprRTerm ExprR' | minus ExprRTerm ExprR' | ε
+ExprRTerm -> Factor ExprRTerm'
+ExprRTerm' -> times Factor ExprRTerm' | divide Factor ExprRTerm' | ε
 Factor -> id | lparen ExprL rparen
-OP -> plus | minus | == | != | > | >= | < | <= | times | divide
-
+relationOperator -> == | != | > | >= | < | <=
 
