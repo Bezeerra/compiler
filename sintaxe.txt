@@ -1,5 +1,3 @@
-
-
 Prog -> Decls $
 Decls -> Decl Decls | Stmt Decls | ε
 Decl -> let id colon Type Decl'
