@@ -2,6 +2,7 @@ import re
 from dataclasses import dataclass
 from typing import Any
 
+from new_compile.Tokenize_code import Tokenize
 
 regex_table = {
     r'^[0-9]': 'num',
@@ -9,13 +10,13 @@ regex_table = {
     r'^f32$': 'f32',
     r'^let$': 'let',
     r'^i32$': 'i32',
-   # r'^p$': 'print',
     r'^[a-z]+$' : 'id',
     r'^=$':'=',
     r'^\+$': '+',
     r'^\-$': '-',
     r'^;$': ';',
     r'^:$': ':',
+    r'^while(.*){.*}?$': 'WhileStmt'
 }
 
 
@@ -53,9 +54,12 @@ class CategoryValue:
 def read_program(file_path: str) -> list[CategoryValue]:
     tokens = []
     token_sequence = []
+    tokenize = Tokenize()
     with open(file_path, 'r') as f:
         for line in f.readlines():
             line = line.replace("\n", "")
+            if "while" in line:
+                tokens.append(line)
             split_line = line.split(" ")
             for token in split_line:
                 if not token:
@@ -68,8 +72,12 @@ def read_program(file_path: str) -> list[CategoryValue]:
         for token in tokens:
             found = False
             for regex, category in regex_table.items():
-                if re.match(regex, token):
-                    token_sequence.append(CategoryValue(category, token))
+                if re_search := re.search(regex, token):
+                    token_sequence.append(tokenize.create_token(
+                        re_search=re_search,
+                        category=category,
+                        token=token
+                    ))
                     found = True
                     break
             if not found:

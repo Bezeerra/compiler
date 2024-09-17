@@ -12,26 +12,26 @@ def print_grammar(G: Grammar) -> None:
 
 def create_example_grammar()->Grammar:
     G = Grammar()
-    G.add_nonterminal('S')
-    G.add_nonterminal('A')
-    G.add_nonterminal('C')
-    G.add_nonterminal('B')
-    G.add_nonterminal('Q')
-    G.add_terminal('$')
-    G.add_terminal('c')
-    G.add_terminal('d')
-    G.add_terminal('q')
-    G.add_terminal('a')
-    G.add_terminal('b')
-    G.add_production('S',['A','C','$']) # 1
-    G.add_production('C',['c']) # 2
-    G.add_production('C',[]) # 3
-    G.add_production('A',['a','B','C','d']) # 4
-    G.add_production('A',['B','Q']) # 5
-    G.add_production('B',['b','B']) # 6
-    G.add_production('B',[]) # 7
-    G.add_production('Q',['q']) # 8
-    G.add_production('Q',[]) # 9
+    G.add_nonterminal('S') # 0
+    G.add_nonterminal('A') # 1
+    G.add_nonterminal('C') # 2
+    G.add_nonterminal('B') # 3
+    G.add_nonterminal('Q') # 4
+    G.add_terminal('$') # 5
+    G.add_terminal('c') # 6
+    G.add_terminal('d') # 7
+    G.add_terminal('q') # 8
+    G.add_terminal('a') # 9
+    G.add_terminal('b') # 10
+    G.add_production('S',['A','C','$']) # 11
+    G.add_production('C',['c']) # 12
+    G.add_production('C',[]) # 13
+    G.add_production('A',['a','B','C','d']) # 14
+    G.add_production('A',['B','Q']) # 15
+    G.add_production('B',['b','B']) # 16
+    G.add_production('B',[]) # 17
+    G.add_production('Q',['q']) # 18
+    G.add_production('Q',[]) # 19
     return G
 
 def Q(ts:token_sequence,p:predict_algorithm)->None:

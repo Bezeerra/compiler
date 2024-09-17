@@ -121,237 +121,257 @@ def create_grammar() -> GrammarEx:
     return G
 
 
-def Prog(ts,p):
-	if ts.peek() in p.predict(50):
-		Decls(ts,p)
-		ts.match('$')
-	else:
-		print("Syntax Error at 'Prog'")
-		sys.exit(0)
+class Produce:
+    def __init__(self):
+        self.full_table = {}
+        self.calculate = []
+        self.functions = []
+        self.address_memory = 150
+        self.start_set_value = False
+        self.variable = None
 
-def Decls(ts,p):
-	if ts.peek() in p.predict(51):
-		Decl(ts,p)
-		Decls(ts,p)
-	elif ts.peek() in p.predict(52):
-		Stmt(ts,p)
-		Decls(ts,p)
-	elif ts.peek() in p.predict(53):
-		return
-	else:
-		print("Syntax Error at 'Decls'")
-		sys.exit(0)
 
-def Decl(ts: token_sequence,p):
-	if ts.peek() in p.predict(54):
-		ts.match('let')
-		ts.match('id')
-		ts.match(':')
-		Type(ts,p)
-		DeclPrime(ts,p)
-	else:
-		print("Syntax Error at 'Decl'")
-		sys.exit(0)
+    def get_address_memory(self):
+        self.address_memory += 1
+        return self.address_memory
 
-def DeclPrime(ts,p):
-	if ts.peek() in p.predict(58):
-		ts.match(';')
-	elif ts.peek() in p.predict(59):
-		ts.match('=')
-		ExprL(ts,p)
-		ts.match(';')
-	else:
-		print("Syntax Error at 'DeclPrime'")
-		sys.exit(0)
+    def write_sam_code(self, text: str) -> None:
+        with open("sam_example.sam", "a") as f:
+            f.write(text)
 
-def Type(ts,p):
-	if ts.peek() in p.predict(55):
-		ts.match('i32')
-	elif ts.peek() in p.predict(56):
-		ts.match('f32')
-	elif ts.peek() in p.predict(57):
-		ts.match('&str')
-	else:
-		print("Syntax Error at 'Type'")
-		sys.exit(0)
+    def Prog(self, ts: token_sequence, p: predict_algorithm):
+        if ts.peek() in p.predict(50):
+            self.Decls(ts, p)
+            ts.match('$')
+        else:
+            print("Syntax Error at 'Prog'")
+            sys.exit(0)
 
-def Stmt(ts: token_sequence, p: predict_algorithm):
-	if ts.peek() in p.predict(60):
-		IfStmt(ts,p)
-	elif ts.peek() in p.predict(61):
-		WhileStmt(ts,p)
-	else:
-		print("Syntax Error at 'Stmt'")
-		sys.exit(0)
+    def Decls(self, ts: token_sequence, p: predict_algorithm):
+        if ts.peek() in p.predict(51):
+            self.Decl(ts, p)
+            self.Decls(ts, p)
+        elif ts.peek() in p.predict(52):
+            self.Stmt(ts, p)
+            self.Decls(ts, p)
+        elif ts.peek() in p.predict(53):
+            return
+        else:
+            print("Syntax Error at 'Decls'")
+            sys.exit(0)
 
-def IfStmt(ts,p):
-	if ts.peek() in p.predict(62):
-		ts.match('if')
-		ts.match('(')
-		ExprL(ts,p)
-		ts.match(')')
-		ts.match('{')
-		Decls(ts,p)
-		ts.match('}')
-		ElsePart(ts,p)
-		ts.match('endif')
-	else:
-		print("Syntax Error at 'IfStmt'")
-		sys.exit(0)
+    def Decl(self, ts: token_sequence, p: predict_algorithm):
+        if ts.peek() in p.predict(54):
+            ts.match('let')
+            ts.match('id')
+            ts.match(':')
+            self.Type(ts, p)
+            self.DeclPrime(ts, p)
+        else:
+            print("Syntax Error at 'Decl'")
+            sys.exit(0)
 
-def ElsePart(ts,p):
-	if ts.peek() in p.predict(63):
-		ts.match('else')
-		ts.match('{')
-		Decls(ts,p)
-		ts.match('}')
-	elif ts.peek() in p.predict(64):
-		return
-	else:
-		print("Syntax Error at 'ElsePart'")
-		sys.exit(0)
+    def DeclPrime(self, ts: token_sequence, p: predict_algorithm):
+        if ts.peek() in p.predict(58):
+            ts.match(';')
+        elif ts.peek() in p.predict(59):
+            ts.match('=')
+            self.ExprL(ts, p)
+            ts.match(';')
+        else:
+            print("Syntax Error at 'DeclPrime'")
+            sys.exit(0)
 
-def WhileStmt(ts,p):
-	if ts.peek() in p.predict(65):
-		ts.match('while')
-		ts.match('(')
-		ExprL(ts,p)
-		ts.match(')')
-		ts.match('{')
-		Decls(ts,p)
-		ts.match('}')
-		ts.match('endwhile')
-	else:
-		print("Syntax Error at 'WhileStmt'")
-		sys.exit(0)
+    def Type(self, ts: token_sequence, p: predict_algorithm):
+        if ts.peek() in p.predict(55):
+            ts.match('i32')
+        elif ts.peek() in p.predict(56):
+            ts.match('f32')
+        elif ts.peek() in p.predict(57):
+            ts.match('&str')
+        else:
+            print("Syntax Error at 'Type'")
+            sys.exit(0)
 
-def ExprL(ts,p):
-	if ts.peek() in p.predict(66):
-		ts.match('NOT')
-		ExprL(ts,p)
-	elif ts.peek() in p.predict(67):
-		simpleExprL(ts,p)
-		ExprLTail(ts,p)
-	else:
-		print("Syntax Error at 'ExprL'")
-		sys.exit(0)
+    def Stmt(self, ts: token_sequence, p: predict_algorithm):
+        if ts.peek() in p.predict(60):
+            self.IfStmt(ts, p)
+        elif ts.peek() in p.predict(61):
+            self.WhileStmt(ts, p)
+        else:
+            print("Syntax Error at 'Stmt'")
+            sys.exit(0)
 
-def ExprLTail(ts,p):
-	if ts.peek() in p.predict(68):
-		ts.match('OR')
-		ExprL(ts,p)
-	elif ts.peek() in p.predict(69):
-		ts.match('AND')
-		ExprL(ts,p)
-	elif ts.peek() in p.predict(70):
-		return
-	else:
-		print("Syntax Error at 'ExprLTail'")
-		sys.exit(0)
+    def IfStmt(self, ts: token_sequence, p: predict_algorithm):
+        if ts.peek() in p.predict(62):
+            ts.match('if')
+            ts.match('(')
+            self.ExprL(ts, p)
+            ts.match(')')
+            ts.match('{')
+            self.Decls(ts, p)
+            ts.match('}')
+            self.ElsePart(ts, p)
+            ts.match('endif')
+        else:
+            print("Syntax Error at 'IfStmt'")
+            sys.exit(0)
 
-def simpleExprL(ts,p):
-	if ts.peek() in p.predict(71):
-		ExprR(ts,p)
-		simpleExprLTail(ts,p)
-	else:
-		print("Syntax Error at 'simpleExprL'")
-		sys.exit(0)
+    def ElsePart(self, ts: token_sequence, p: predict_algorithm):
+        if ts.peek() in p.predict(63):
+            ts.match('else')
+            ts.match('{')
+            self.Decls(ts, p)
+            ts.match('}')
+        elif ts.peek() in p.predict(64):
+            return
+        else:
+            print("Syntax Error at 'ElsePart'")
+            sys.exit(0)
 
-def simpleExprLTail(ts,p):
-	if ts.peek() in p.predict(72):
-		relationOperator(ts,p)
-		ExprR(ts,p)
-	elif ts.peek() in p.predict(73):
-		return
-	else:
-		print("Syntax Error at 'simpleExprLTail'")
-		sys.exit(0)
+    def WhileStmt(self, ts: token_sequence, p: predict_algorithm):
+        if ts.peek() in p.predict(65):
+            ts.match('while')
+            ts.match('(')
+            self.ExprL(ts, p)
+            ts.match(')')
+            ts.match('{')
+            self.Decls(ts, p)
+            ts.match('}')
+            ts.match('endwhile')
+        else:
+            print("Syntax Error at 'WhileStmt'")
+            sys.exit(0)
 
-def ExprR(ts,p):
-	if ts.peek() in p.predict(74):
-		ExprRTerm(ts,p)
-		ExprRPrime(ts,p)
-	else:
-		print("Syntax Error at 'ExprR'")
-		sys.exit(0)
+    def ExprL(self, ts: token_sequence, p: predict_algorithm):
+        if ts.peek() in p.predict(66):
+            ts.match('NOT')
+            self.ExprL(ts, p)
+        elif ts.peek() in p.predict(67):
+            self.simpleExprL(ts, p)
+            self.ExprLTail(ts, p)
+        else:
+            print("Syntax Error at 'ExprL'")
+            sys.exit(0)
 
-def ExprRPrime(ts,p):
-	if ts.peek() in p.predict(75):
-		ts.match('+')
-		ExprRTerm(ts,p)
-		ExprRPrime(ts,p)
-	elif ts.peek() in p.predict(76):
-		ts.match('-')
-		ExprRTerm(ts,p)
-		ExprRPrime(ts,p)
-	elif ts.peek() in p.predict(77):
-		return
-	else:
-		print("Syntax Error at 'ExprRPrime'")
-		sys.exit(0)
+    def ExprLTail(self, ts: token_sequence, p: predict_algorithm):
+        if ts.peek() in p.predict(68):
+            ts.match('OR')
+            self.ExprL(ts, p)
+        elif ts.peek() in p.predict(69):
+            ts.match('AND')
+            self.ExprL(ts, p)
+        elif ts.peek() in p.predict(70):
+            return
+        else:
+            print("Syntax Error at 'ExprLTail'")
+            sys.exit(0)
 
-def ExprRTerm(ts,p):
-	if ts.peek() in p.predict(78):
-		Factor(ts,p)
-		ExprRTermPrime(ts,p)
-	else:
-		print("Syntax Error at 'ExprRTerm'")
-		sys.exit(0)
+    def simpleExprL(self, ts: token_sequence, p: predict_algorithm):
+        if ts.peek() in p.predict(71):
+            self.ExprR(ts, p)
+            self.simpleExprLTail(ts, p)
+        else:
+            print("Syntax Error at 'simpleExprL'")
+            sys.exit(0)
 
-def ExprRTermPrime(ts,p):
-	if ts.peek() in p.predict(79):
-		ts.match('*')
-		Factor(ts,p)
-		ExprRTermPrime(ts,p)
-	elif ts.peek() in p.predict(80):
-		ts.match('/')
-		Factor(ts,p)
-		ExprRTermPrime(ts,p)
-	elif ts.peek() in p.predict(81):
-		return
-	else:
-		print("Syntax Error at 'ExprRTermPrime'")
-		sys.exit(0)
+    def simpleExprLTail(self, ts: token_sequence, p: predict_algorithm):
+        if ts.peek() in p.predict(72):
+            self.relationOperator(ts, p)
+            self.ExprR(ts, p)
+        elif ts.peek() in p.predict(73):
+            return
+        else:
+            print("Syntax Error at 'simpleExprLTail'")
+            sys.exit(0)
 
-def Factor(ts,p):
-	if ts.peek() in p.predict(82):
-		ts.match('id')
-	elif ts.peek() in p.predict(83):
-		ts.match('num')
-	elif ts.peek() in p.predict(84):
-		ts.match('fnum')
-	elif ts.peek() in p.predict(85):
-		ts.match('(')
-		ExprL(ts,p)
-		ts.match(')')
-	else:
-		print("Syntax Error at 'Factor'")
-		sys.exit(0)
+    def ExprR(self, ts: token_sequence, p: predict_algorithm):
+        if ts.peek() in p.predict(74):
+            self.ExprRTerm(ts, p)
+            self.ExprRPrime(ts, p)
+        else:
+            print("Syntax Error at 'ExprR'")
+            sys.exit(0)
 
-def relationOperator(ts,p):
-	if ts.peek() in p.predict(86):
-		ts.match('==')
-	elif ts.peek() in p.predict(87):
-		ts.match('!=')
-	elif ts.peek() in p.predict(88):
-		ts.match('>')
-	elif ts.peek() in p.predict(89):
-		ts.match('>=')
-	elif ts.peek() in p.predict(90):
-		ts.match('<')
-	elif ts.peek() in p.predict(91):
-		ts.match('<=')
-	else:
-		print("Syntax Error at 'relationOperator'")
-		sys.exit(0)
+    def ExprRPrime(self, ts: token_sequence, p: predict_algorithm):
+        if ts.peek() in p.predict(75):
+            ts.match('+')
+            self.ExprRTerm(ts, p)
+            self.ExprRPrime(ts, p)
+        elif ts.peek() in p.predict(76):
+            ts.match('-')
+            self.ExprRTerm(ts, p)
+            self.ExprRPrime(ts, p)
+        elif ts.peek() in p.predict(77):
+            return
+        else:
+            print("Syntax Error at 'ExprRPrime'")
+            sys.exit(0)
+
+    def ExprRTerm(self, ts: token_sequence, p: predict_algorithm):
+        if ts.peek() in p.predict(78):
+            self.Factor(ts, p)
+            self.ExprRTermPrime(ts, p)
+        else:
+            print("Syntax Error at 'ExprRTerm'")
+            sys.exit(0)
+
+    def ExprRTermPrime(self, ts: token_sequence, p: predict_algorithm):
+        if ts.peek() in p.predict(79):
+            ts.match('*')
+            self.Factor(ts, p)
+            self.ExprRTermPrime(ts, p)
+        elif ts.peek() in p.predict(80):
+            ts.match('/')
+            self.Factor(ts, p)
+            self.ExprRTermPrime(ts, p)
+        elif ts.peek() in p.predict(81):
+            return
+        else:
+            print("Syntax Error at 'ExprRTermPrime'")
+            sys.exit(0)
+
+    def Factor(self, ts: token_sequence, p: predict_algorithm):
+        if ts.peek() in p.predict(82):
+            ts.match('id')
+        elif ts.peek() in p.predict(83):
+            ts.match('num')
+        elif ts.peek() in p.predict(84):
+            ts.match('fnum')
+        elif ts.peek() in p.predict(85):
+            ts.match('(')
+            self.ExprL(ts, p)
+            ts.match(')')
+        else:
+            print("Syntax Error at 'Factor'")
+            sys.exit(0)
+
+    def relationOperator(self, ts: token_sequence, p: predict_algorithm):
+        if ts.peek() in p.predict(86):
+            ts.match('==')
+        elif ts.peek() in p.predict(87):
+            ts.match('!=')
+        elif ts.peek() in p.predict(88):
+            ts.match('>')
+        elif ts.peek() in p.predict(89):
+            ts.match('>=')
+        elif ts.peek() in p.predict(90):
+            ts.match('<')
+        elif ts.peek() in p.predict(91):
+            ts.match('<=')
+        else:
+            print("Syntax Error at 'relationOperator'")
+            sys.exit(0)
 
 
 # Exemplo de uso
 if __name__ == '__main__':
     G = create_grammar()
     # write_ll1_parser(G)
-    print_grammar(G)
     predict_alg = predict_algorithm(G)
     tokens = read_program("code.rs")
-    ts = token_sequence(tokens)
-    Prog(ts, predict_alg)
+    produce = Produce()
+    ts = token_sequence(tokens, produce)
+    produce.Prog(ts, predict_alg)
+    for function in produce.functions:
+        print(function)

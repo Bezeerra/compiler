@@ -2,7 +2,7 @@ from grammar import GrammarEx
 
 def write_ll1_parser(g:GrammarEx):
     for X in g.nonterminals():
-        print(f'\ndef {X}(ts: token_sequence, p: predict_algorithm):')
+        print(f'\ndef {X}(self, ts: token_sequence, p: predict_algorithm):')
         first = True
         for rule in g.productions_for(X):
             rhs = g.rhs(rule)
@@ -18,7 +18,7 @@ def write_ll1_parser(g:GrammarEx):
                 if g.is_terminal(Y):
                     print(f"\t\tts.match('{Y}')")
                 else:
-                    print(f'\t\t{Y}(ts,p)')
+                    print(f'\t\tself.{Y}(ts,p)')
 
         print('\telse:')
         print(f"\t\tprint(\"Syntax Error at '{X}'\")")
