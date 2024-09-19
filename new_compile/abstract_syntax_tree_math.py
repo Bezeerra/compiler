@@ -1,19 +1,23 @@
 import ast
+import re
+
 
 class SAMGenerator(ast.NodeVisitor):
     def __init__(self, context=None):
         self.instructions = []
+        self.is_float_numbers = False
         self.context = context if context else {}
 
     def visit_BinOp(self, node):
-        # Primeiro visitar os filhos (lado esquerdo e direito)
         self.visit(node.left)
         self.visit(node.right)
 
-        # Determinar o operador e gerar a instrução SAM correta
         op_type = type(node.op)
         if op_type == ast.Add:
-            self.instructions.append("ADD")
+            if self.is_float_numbers:
+                self.instructions.append("ADDF")
+            else:
+                self.instructions.append("ADD")
         elif op_type == ast.Sub:
             self.instructions.append("SUB")
         elif op_type == ast.Mult:
@@ -31,27 +35,26 @@ class SAMGenerator(ast.NodeVisitor):
         self.instructions.append(f"PUSHIMM {node.n}")
 
     def visit_Constant(self, node):
-        self.instructions.append(f"PUSHIMM {node.value}")
+        if isinstance(node.value, float):
+            self.is_float_numbers = True
+            self.instructions.append(f"PUSHIMMF {node.value}")
+        else:
+            self.instructions.append(f"PUSHIMM {node.value}")
 
     def visit_Name(self, node):
         var_name = node.id
         if var_name in self.context:
-            # Se a variável está no contexto, usamos seu valor
             value = self.context[var_name]
             self.instructions.append(f"PUSHABS {value}")
         else:
             print("ERROR VARIABLE NOT IN CONTEXT")
-            # Se não, empilhamos o nome da variável
-            # self.instructions.append(f"PUSHABS {var_name}")
 
     def visit_Expr(self, node):
         self.visit(node.value)
 
-def generate_sam(expr, context=None):
-    # Convertemos a expressão para uma árvore AST
+def generate_sam_math_code(expr, context=None):
     tree = ast.parse(expr, mode='eval')
     generator = SAMGenerator(context)
-    # Visitamos a árvore e geramos as instruções SAM
     generator.visit(tree.body)
     return generator.instructions
 

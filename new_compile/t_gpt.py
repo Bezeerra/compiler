@@ -151,5 +151,5 @@ G.add_production('Factor', ['fnum'])  # 43
 G.add_production('Factor', ['lparen', 'Expr', 'rparen'])   # 44
 
 # Verificar se a gramática é LL(1)
-is_ll1 = G.is_ll1()
-print("A gramática é LL(1)?", is_ll1)
+# is_ll1 = G.is_ll1()
+# print("A gramática é LL(1)?", is_ll1)
