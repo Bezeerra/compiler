@@ -11,6 +11,7 @@ from Tokenize_code import TokenVariable, TokenAddressMemory
 from constants import LOGICAL_OPERATIONS
 from grammar import create_grammar
 from ll_1_check import predict_algorithm, is_ll1
+from new_compile.create_print_sam import string_to_sam
 
 
 class token_sequence:
@@ -60,16 +61,27 @@ class token_sequence:
 
 
     def build_operations(self, token: TokenVariable):
+        if token.value == "print":
+            if self.__ts[self.__idx+2].category == '"string"':
+                self.produce.functions.extend(string_to_sam(self.__ts[self.__idx+2].value))
+            else:
+                self.produce.functions.append(f"PUSHABS {self.produce.full_table[self.__ts[self.__idx+2].value]}")
+                self.produce.functions.append("WRITE")
+        if token.category == "func_name" and not self.produce.start_func_context:
+            self.produce.functions.append(f"JUMP {token.value}".upper())
+            self.produce.functions.append(f"AFTER{token.value}:".upper())
         if token.value == "func":
-            self.produce.start_func_context = token.value
-            self.produce.start_produce_index_func = len(self.produce.functions) - 1
+            self.produce.start_func_context = self.__ts[self.__idx+1].value
+            self.produce.start_produce_index_func = len(self.produce.functions)
         if token.value == "return" and self.produce.start_func_context:
-            aux = []
+            aux = [f"{self.produce.start_func_context}:".upper()]
             aux.extend(self.produce.functions[self.produce.start_produce_index_func:])
+            aux.append(f"JUMP AFTER{self.produce.start_func_context}".upper())
             self.produce.functions = self.produce.functions[:self.produce.start_produce_index_func]
-            self.produce.functions.extend(aux)
+            self.produce.functions_declare.append(aux)
             self.produce.start_produce_index_func = None
-        if  self.produce.else_context > 0 and token.value == '}':
+            self.produce.start_func_context = None
+        if self.produce.else_context > 0 and token.value == '}':
             self.produce.functions.append(f"ENDIF{self.produce.if_context}:")
             self.produce.else_context+= -1
         elif self.produce.in_context and (self.produce.in_context[-1] == 'if' and  self.produce.if_context > 0 and token.value == '}'):
@@ -93,6 +105,8 @@ class token_sequence:
             self.produce.while_context -= 1
 
         if token.category == "id" and self.__ts[self.__idx+1].value != '(':
+            if token.value not in self.produce.full_table and self.__ts[self.__idx+1].value == "=":
+                raise ValueError(f"Variable '{token.value}' NOT EXIST!")
             if not self.produce.full_table.get(token.value):
                 self.produce.full_table[token.value] = None
             if self.__ts[self.__idx+1].value == ":" or self.__ts[self.__idx+1].value == "=":
@@ -115,6 +129,10 @@ class token_sequence:
     def match(self, token: TokenVariable) -> None:
         if token == "$":
             self.produce.functions.append("STOP")
+            for function_decl in self.produce.functions_declare:
+                for step_func in function_decl:
+                    self.produce.functions.append(step_func)
+
             self.advance()
             return
         self.build_operations(self.peek())

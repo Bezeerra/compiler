@@ -19,11 +19,20 @@ class SAMGenerator(ast.NodeVisitor):
             else:
                 self.instructions.append("ADD")
         elif op_type == ast.Sub:
-            self.instructions.append("SUB")
+            if self.is_float_numbers:
+                self.instructions.append("SUBF")
+            else:
+                self.instructions.append("SUB")
         elif op_type == ast.Mult:
-            self.instructions.append("TIMES")
+            if self.is_float_numbers:
+                self.instructions.append("TIMESF")
+            else:
+                self.instructions.append("TIMES")
         elif op_type == ast.Div:
-            self.instructions.append("DIV")
+            if self.is_float_numbers:
+                self.instructions.append("DIVF")
+            else:
+                self.instructions.append("DIV")
         elif op_type == ast.Mod:
             self.instructions.append("MOD")
         elif op_type == ast.Pow:
@@ -45,6 +54,8 @@ class SAMGenerator(ast.NodeVisitor):
         var_name = node.id
         if var_name in self.context:
             value = self.context[var_name]
+            if not value:
+                raise ValueError(f"Variable '{var_name}' no has value")
             self.instructions.append(f"PUSHABS {value}")
         else:
             print("ERROR VARIABLE NOT IN CONTEXT")

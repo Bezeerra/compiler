@@ -41,20 +41,20 @@ class SAMGenerator(ast.NodeVisitor):
 
         op_type = type(node.ops[0])
         if op_type == ast.Gt:  # >
-            self.instructions.append("GREATER")
+            self.instructions.append("LESS")
         elif op_type == ast.Lt:  # <
-            self.instructions.append("LESS")
+            self.instructions.append("GREATER")
         elif op_type == ast.GtE:  # >=
-            self.instructions.append("LESS")
+            self.instructions.append("GREATER")
             self.instructions.append("NOT")
         elif op_type == ast.LtE:  # <=
-            self.instructions.append("GREATER")
+            self.instructions.append("LESS")
             self.instructions.append("NOT")
         elif op_type == ast.Eq:  # ==
             self.instructions.append("EQUAL")
+            self.instructions.append("NOT")
         elif op_type == ast.NotEq:  # !=
             self.instructions.append("EQUAL")
-            self.instructions.append("NOT")
         else:
             self.instructions.append("UNKNOWN_COMPARISON")
 

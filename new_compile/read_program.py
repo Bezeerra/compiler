@@ -44,13 +44,14 @@ regex_table = [
     (r'^else$', 'else'),  # Palavra-chave else
     (r'^endif$', 'endif'),  # Palavra-chave endif
     (r'^print$', 'print'),  # Palavra-chave print
-    (r'^"[A-Za-z_][A-Za-z0-9_]*"$', "string"),
+    (r'^"[A-Za-z_][A-Za-z0-9_]*"$', '"string"'),
 
     # Números e identificadores
     (r'^\d+\.\d+$', 'fnum'),
     (r'^\d+$', 'num'),
     (r'^[A-Za-z_][A-Za-z0-9_]*$', 'id'),
 
+    (r'^[A-Za-z_][A-Za-z0-9_]*$', 'func_name'),  # Palavra-chave endif
     # Operadores relacionais e de igualdade (padrões mais longos primeiro)
     (r'^>=$', '>='),
     (r'^<=$', '<='),
@@ -101,7 +102,6 @@ def make_group_name(category):
 def read_program(file_path: str) -> list[CategoryValue]:
     group_names = {}
     token_specification = []
-
     for regex, category in regex_table:
         adjusted_regex = regex.strip('^$')
         group_name = make_group_name(category)
@@ -147,6 +147,8 @@ def read_program(file_path: str) -> list[CategoryValue]:
         kind = mo.lastgroup
         category = group_names[kind]
         value = mo.group(kind)
+        if kind == "id" and get_token(code, mo.span()[1]).group() == '(':
+            category = 'func_name'
         if category == 'NEWLINE':
             line += 1
         elif category in ('SKIP', 'COMMENT'):
