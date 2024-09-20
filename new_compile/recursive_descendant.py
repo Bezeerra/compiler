@@ -1,11 +1,12 @@
 import sys
 
-from new_compile.grammar import GrammarEx
-from new_compile.ll_1_check import predict_algorithm
-from new_compile.main import token_sequence
-from new_compile.read_program import read_program
+from grammar import GrammarEx
+from ll_1_check import predict_algorithm
+from main import token_sequence
+from read_program import read_program
 # from new_compile.t_gpt import is_ll1
-from new_compile.wirte_ll1_parser import write_ll1_parser
+from wirte_ll1_parser import write_ll1_parser
+from write_program import SamHandler
 
 
 def print_grammar(G: GrammarEx) -> None:
@@ -425,10 +426,11 @@ if __name__ == '__main__':
     G = create_grammar()
     # write_ll1_parser(G)
     predict_alg = predict_algorithm(G)
-    tokens = read_program("code.rs")
+    tokens = read_program("E:\\Faculdade\\Compiladores\compiler\\new_compile\\code.rs")
     produce = Produce()
     ts = token_sequence(tokens, produce)
     produce.Prog(ts, predict_alg)
-    for function in produce.functions:
-        print(function)
+    SamHandler().write_sam_file(produce.functions)
+    
+    
 

@@ -3,14 +3,14 @@ import re
 from pathlib import Path
 from tokenize import Token
 
-from userpath.cli import append
+# from userpath.cli import append
 
-from new_compile.abstract_syntax_tree_math import generate_sam_math_code
-from new_compile.abstract_syntax_tree_logical import generate_sam_logical_code
-from new_compile.Tokenize_code import TokenVariable, TokenAddressMemory
-from new_compile.constants import LOGICAL_OPERATIONS
-from new_compile.grammar import create_grammar
-from new_compile.ll_1_check import predict_algorithm, is_ll1
+from abstract_syntax_tree_math import generate_sam_math_code
+from abstract_syntax_tree_logical import generate_sam_logical_code
+from Tokenize_code import TokenVariable, TokenAddressMemory
+from constants import LOGICAL_OPERATIONS
+from grammar import create_grammar
+from ll_1_check import predict_algorithm, is_ll1
 
 
 class token_sequence:
@@ -69,10 +69,9 @@ class token_sequence:
             self.produce.functions = self.produce.functions[:self.produce.start_produce_index_func]
             self.produce.functions.extend(aux)
             self.produce.start_produce_index_func = None
-        if self.produce.in_context and (self.produce.in_context[-1] == 'if' and self.produce.else_context > 0 and token.value == '}'):
+        if  self.produce.else_context > 0 and token.value == '}':
             self.produce.functions.append(f"ENDIF{self.produce.if_context}:")
             self.produce.else_context+= -1
-            self.produce.in_context.pop()
         elif self.produce.in_context and (self.produce.in_context[-1] == 'if' and  self.produce.if_context > 0 and token.value == '}'):
             self.produce.if_context -= 1
             self.produce.in_context.pop()

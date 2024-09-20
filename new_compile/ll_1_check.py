@@ -1,4 +1,4 @@
-from new_compile.grammar import GrammarEx
+from grammar import GrammarEx
 
 
 class follow_algorithm:
